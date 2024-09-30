@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { getPokemon, getPokemonSpecies } from '../services/pokemonsService';
 
 const Home = () => {
   const [pokemons, setPokemons] = useState([]);
@@ -19,7 +18,9 @@ const Home = () => {
         }
       }
 
-      const promises = randomPokemons.map(id => getPokemon(id));
+      const promises = randomPokemons.map(id =>
+        fetch(`http://localhost:8080/pokemon/${id}`).then(res => res.json())
+      );
       const pokemonsData = await Promise.all(promises);
       setPokemons(pokemonsData);
     };
@@ -37,11 +38,16 @@ const Home = () => {
     }
 
     try {
-      const data = await getPokemon(searchTerm.toLowerCase());
-      const speciesData = await getPokemonSpecies(data.id); // Buscar informações da espécie
-      setSelectedPokemon({ ...data, flavor_text_entries: speciesData.flavor_text_entries });
+      const response = await fetch(`http://localhost:8080/pokemon/${searchTerm.toLowerCase()}`);
+      const data = await response.json();
+      if (response.ok) {
+        setSelectedPokemon(data);
+      } else {
+        setError('Pokémon não encontrado');
+        setSelectedPokemon(null);
+      }
     } catch (error) {
-      setError('Pokémon não encontrado');
+      setError('Erro ao buscar Pokémon');
       setSelectedPokemon(null);
     }
   };
@@ -88,7 +94,7 @@ const Home = () => {
             <img src={selectedPokemon.sprites.front_default} alt={selectedPokemon.name} />
             <p className="card-text">
               <strong>Altura:</strong> {selectedPokemon.height * 10} centimetros<br />
-              <strong>Peso:</strong> {selectedPokemon.weight / 10}   kilos<br />
+              <strong>Peso:</strong> {selectedPokemon.weight / 10} kilos<br />
               <strong>Tipos:</strong> {formatTypes(selectedPokemon.types)}<br />
               <strong>Habilidades:</strong> {formatAbilities(selectedPokemon.abilities)}<br />
               <strong>Descrição:</strong> {selectedPokemon.flavor_text_entries.find(entry => entry.language.name === 'en')?.flavor_text || "Descrição não disponível."}
