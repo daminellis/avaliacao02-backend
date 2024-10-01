@@ -36,14 +36,6 @@ app.post('/pokemon', (req, res) => {
   res.json({ message: `Pokémon ${name} do tipo ${type} foi adicionado!` });
 });
 
-app.get('/sobre', (req, res) => {
-  res.json({
-    "nome": "Meu Web Service de Pokémon",
-    "versao": "1.0.0",
-    "autor": "Seu Nome",
-  });
-});
-
 app.listen(8080, () => {
   console.log('Servidor rodando na porta 8080');
 });
